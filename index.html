@@ -1,0 +1,221 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+  <meta name="description" content="Solar System Challenge – Arrange the Planets. An educational drag-and-drop game." />
+  <meta name="theme-color" content="#ffffff" />
+  <title>Solar System Challenge – Arrange the Planets</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@500;600;700;800&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <div class="app">
+    <!-- Top bar: task text + stats -->
+    <header class="header" role="banner">
+      <div class="header-left">
+        <p class="explorer-chip" id="explorerChip" hidden>
+          <span class="explorer-chip-icon" aria-hidden="true">🚀</span>
+          Explorer <strong id="explorerNameDisplay">Friend</strong>
+        </p>
+        <p class="task-label" id="taskLabel">
+          Task 1: Drag and Drop the planets into the correct order from the sun
+        </p>
+        <h1 class="sr-only">Solar System Challenge</h1>
+      </div>
+
+      <div class="header-stats" aria-live="polite">
+        <div class="stat-pill">
+          <span class="stat-label">Progress</span>
+          <span class="stat-value" id="progressText">0/8</span>
+          <div class="progress-bar" role="progressbar" aria-valuemin="0" aria-valuemax="8" aria-valuenow="0" aria-label="Planets placed" id="progressBar">
+            <div class="progress-fill" id="progressFill"></div>
+          </div>
+        </div>
+        <div class="stat-pill">
+          <span class="stat-label">Score</span>
+          <span class="stat-value" id="scoreText">0 / 80</span>
+        </div>
+        <button type="button" class="btn btn-icon" id="btnSound" aria-label="Toggle sound" aria-pressed="true" title="Sound ON/OFF">
+          <svg class="icon-sound-on" viewBox="0 0 24 24" width="20" height="20" aria-hidden="true" fill="currentColor">
+            <path d="M3 9v6h4l5 5V4L7 9H3zm13.5 3c0-1.77-1.02-3.29-2.5-4.03v8.05c1.48-.73 2.5-2.25 2.5-4.02zM14 3.23v2.06c2.89.86 5 3.54 5 6.71s-2.11 5.85-5 6.71v2.06c4.01-.91 7-4.49 7-8.77s-2.99-7.86-7-8.77z"/>
+          </svg>
+          <svg class="icon-sound-off" viewBox="0 0 24 24" width="20" height="20" aria-hidden="true" fill="currentColor" hidden>
+            <path d="M16.5 12c0-1.77-1.02-3.29-2.5-4.03v2.21l2.45 2.45c.03-.2.05-.41.05-.63zm2.5 0c0 .94-.2 1.82-.54 2.64l1.51 1.51C20.63 14.91 21 13.5 21 12c0-4.28-2.99-7.86-7-8.77v2.06c2.89.86 5 3.54 5 6.71zM4.27 3L3 4.27 7.73 9H3v6h4l5 5v-6.73l4.25 4.25c-.67.52-1.42.93-2.25 1.18v2.06c1.38-.31 2.63-.95 3.69-1.81L19.73 21 21 19.73l-9-9L4.27 3zM12 4L9.91 6.09 12 8.18V4z"/>
+          </svg>
+        </button>
+        <button type="button" class="btn btn-text" id="btnInstructions" aria-label="Show instructions">Help</button>
+      </div>
+    </header>
+
+    <main class="main" id="main" role="main">
+      <!-- Start screen -->
+      <section class="start-screen" id="startScreen" aria-labelledby="startHeading">
+        <div class="start-card start-card--pixar">
+          <div class="start-sun pixar-bob" aria-hidden="true">
+            <div class="start-sparkles" aria-hidden="true"></div>
+            <div class="sun-face-mini">
+              <span class="sun-eye"></span><span class="sun-eye"></span>
+              <span class="sun-mouth"></span>
+            </div>
+          </div>
+          <h2 id="startHeading">Ready to Explore?</h2>
+          <p class="start-lead">Every great space story starts with a hero. What’s your explorer name?</p>
+          <label class="name-field" for="playerName">
+            <span class="name-field-label">Your name</span>
+            <input
+              type="text"
+              id="playerName"
+              name="playerName"
+              maxlength="20"
+              autocomplete="nickname"
+              placeholder="e.g. Aisha, Leo, Sam…"
+              aria-describedby="nameHint"
+            />
+          </label>
+          <p class="name-hint" id="nameHint">We’ll cheer you on by name when you place planets correctly.</p>
+          <p class="start-error" id="startError" role="alert" hidden>Please enter your explorer name to begin.</p>
+          <button type="button" class="btn btn-primary btn-lg" id="btnStart">Begin My Mission</button>
+        </div>
+      </section>
+
+      <!-- Game board -->
+      <div class="game-board" id="gameBoard" hidden>
+        <div class="play-layout">
+          <!-- Black ink-blot space with concentric orbits -->
+          <section class="space-blob" id="spaceBlob" aria-labelledby="arrangeHeading">
+            <h2 id="arrangeHeading" class="sr-only">Orbit Arrangement</h2>
+
+            <div class="blob-stars" aria-hidden="true"></div>
+            <div class="fx-layer" id="fxLayer" aria-hidden="true"></div>
+
+            <div class="orbit-stage" id="orbitStage">
+              <!-- Concentric orbit rings -->
+              <div class="orbit-ring" style="--r: 11%" aria-hidden="true"></div>
+              <div class="orbit-ring" style="--r: 20%" aria-hidden="true"></div>
+              <div class="orbit-ring" style="--r: 29%" aria-hidden="true"></div>
+              <div class="orbit-ring" style="--r: 38%" aria-hidden="true"></div>
+              <div class="orbit-ring" style="--r: 48%" aria-hidden="true"></div>
+              <div class="orbit-ring" style="--r: 58%" aria-hidden="true"></div>
+              <div class="orbit-ring" style="--r: 69%" aria-hidden="true"></div>
+              <div class="orbit-ring" style="--r: 80%" aria-hidden="true"></div>
+
+              <!-- Sun (left center) -->
+              <div class="sun-anchor" aria-label="The Sun — starting reference point" role="img">
+                <div class="sun" aria-hidden="true">
+                  <div class="sun-rays"></div>
+                  <div class="sun-core">
+                    <div class="sun-face">
+                      <span class="sun-eye sun-eye--left"></span>
+                      <span class="sun-eye sun-eye--right"></span>
+                      <span class="sun-mouth"></span>
+                    </div>
+                  </div>
+                </div>
+                <span class="speech-bubble sun-bubble">SUN</span>
+              </div>
+
+              <!-- Drop slots on orbits (filled by JS) -->
+              <div class="slots" id="slots" role="list" aria-label="Planet orbit slots from closest to farthest"></div>
+            </div>
+          </section>
+
+          <!-- Planet tray outside the blob -->
+          <aside class="planet-tray" aria-labelledby="trayHeading">
+            <h2 id="trayHeading" class="tray-title">Drag planets here ↑</h2>
+            <p class="tray-hint" id="trayHint">onto the correct orbit</p>
+            <div class="planets" id="planets" role="listbox" aria-label="Available planets" aria-multiselectable="false"></div>
+          </aside>
+        </div>
+
+        <nav class="controls" aria-label="Game controls">
+          <button type="button" class="btn btn-secondary" id="btnHint" aria-label="Get a hint for the next empty slot">Hint</button>
+          <button type="button" class="btn btn-secondary" id="btnRestart" aria-label="Restart the game">Restart</button>
+          <button type="button" class="btn btn-ghost" id="btnReset" aria-label="Reset progress">Reset</button>
+        </nav>
+      </div>
+    </main>
+
+    <!-- Feedback toast -->
+    <div class="feedback" id="feedback" role="status" aria-live="polite" aria-atomic="true" hidden>
+      <div class="feedback-inner">
+        <span class="feedback-icon" id="feedbackIcon" aria-hidden="true"></span>
+        <div class="feedback-body">
+          <strong class="feedback-title" id="feedbackTitle"></strong>
+          <p class="feedback-text" id="feedbackText"></p>
+        </div>
+        <button type="button" class="btn btn-icon feedback-close" id="feedbackClose" aria-label="Dismiss feedback">&times;</button>
+      </div>
+    </div>
+
+    <div class="hint-toast" id="hintToast" role="status" aria-live="polite" hidden>
+      <div class="hint-inner">
+        <span class="hint-badge">Hint</span>
+        <p id="hintText"></p>
+      </div>
+    </div>
+  </div>
+
+  <!-- Instructions modal -->
+  <div class="modal" id="modalInstructions" role="dialog" aria-modal="true" aria-labelledby="instructionsTitle" hidden>
+    <div class="modal-backdrop" data-close="modalInstructions"></div>
+    <div class="modal-panel">
+      <button type="button" class="btn btn-icon modal-close" data-close="modalInstructions" aria-label="Close instructions">&times;</button>
+      <h2 id="instructionsTitle">How to Play</h2>
+      <ol class="instructions-list">
+        <li>The <strong>Sun</strong> is on the left — drag planets onto orbits from closest to farthest.</li>
+        <li><strong>Drag</strong> a planet from the tray onto an empty numbered orbit slot.</li>
+        <li>Correct placements make the planet <strong>smile</strong> and lock in place (+10 points).</li>
+        <li>Wrong placements make the planet look <strong>sad</strong> — then it returns to the tray.</li>
+        <li>Keyboard: select a planet with <kbd>Enter</kbd>, then press <kbd>1</kbd>–<kbd>8</kbd>.</li>
+        <li>Use <strong>Hint</strong> for a clue about the next empty orbit.</li>
+      </ol>
+      <button type="button" class="btn btn-primary" data-close="modalInstructions">Got it!</button>
+    </div>
+  </div>
+
+  <!-- Completion modal -->
+  <div class="modal modal-complete" id="modalComplete" role="dialog" aria-modal="true" aria-labelledby="completeTitle" hidden>
+    <div class="modal-backdrop"></div>
+    <div class="confetti" id="confetti" aria-hidden="true"></div>
+    <div class="modal-panel complete-panel complete-panel--pixar">
+      <div class="title-card" aria-hidden="true">
+        <span class="title-card-glow"></span>
+      </div>
+      <p class="complete-kicker" id="completeKicker">Mission Complete</p>
+      <h2 id="completeTitle">Amazing! You completed the Solar System!</h2>
+      <div class="badge-card" id="badgeCard">
+        <span class="badge-emoji" id="badgeEmoji" aria-hidden="true">🌟</span>
+        <div>
+          <p class="badge-label">You earned the title</p>
+          <p class="badge-title" id="badgeTitle">Solar Scout</p>
+        </div>
+      </div>
+      <p class="complete-score">Final Score: <strong id="finalScore">0</strong> / 80</p>
+      <p class="complete-message" id="completeMessage"></p>
+      <div class="complete-order" id="completeOrder" role="list" aria-label="Planets in correct order"></div>
+      <div class="complete-actions">
+        <button type="button" class="btn btn-primary" id="btnPlayAgain">Play Again</button>
+        <button type="button" class="btn btn-secondary" id="btnReview">Review Planets</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Review modal -->
+  <div class="modal" id="modalReview" role="dialog" aria-modal="true" aria-labelledby="reviewTitle" hidden>
+    <div class="modal-backdrop" data-close="modalReview"></div>
+    <div class="modal-panel review-panel">
+      <button type="button" class="btn btn-icon modal-close" data-close="modalReview" aria-label="Close review">&times;</button>
+      <h2 id="reviewTitle">Review the Planets</h2>
+      <div class="review-list" id="reviewList"></div>
+      <button type="button" class="btn btn-primary" data-close="modalReview">Close</button>
+    </div>
+  </div>
+
+  <div class="drag-ghost" id="dragGhost" aria-hidden="true" hidden></div>
+
+  <script src="script.js"></script>
+</body>
+</html>
