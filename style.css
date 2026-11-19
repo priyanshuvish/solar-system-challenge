@@ -794,6 +794,10 @@ kbd {
   max-width: 90%;
 }
 
+.slot-dist {
+  display: none;
+}
+
 .slot.drag-over {
   border-style: solid;
   border-color: #5eb3e8;
@@ -860,6 +864,14 @@ kbd {
   min-height: 200px;
 }
 
+.tray-head {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.15rem;
+  width: 100%;
+}
+
 .tray-title {
   font-size: 0.85rem;
   font-weight: 800;
@@ -867,10 +879,17 @@ kbd {
   text-align: center;
 }
 
+.tray-title-mobile {
+  display: none;
+}
+
 .tray-hint {
   font-size: 0.7rem;
   color: var(--text-muted);
-  margin-top: -0.25rem;
+}
+
+.vertical-path {
+  display: none;
 }
 
 .planets {
@@ -1638,63 +1657,354 @@ kbd {
   font-weight: 600;
 }
 
-/* ---------- Responsive ---------- */
-@media (max-width: 860px) {
-  .play-layout {
-    grid-template-columns: 1fr;
-  }
+/* =========================================================
+   VERTICAL LAYOUT (mobile / narrow screens)
+   Applied via body.is-vertical-layout (JS) AND max-width media
+   ========================================================= */
 
-  .space-blob {
-    min-height: min(52vh, 420px);
-    border-radius: 36% 64% 50% 50% / 45% 40% 60% 55%;
-  }
+body.is-vertical-layout .app {
+  padding: 0.65rem 0.75rem 8rem;
+}
 
-  .planet-tray {
-    flex-direction: row;
-    flex-wrap: wrap;
-    justify-content: center;
-    align-items: center;
-    min-height: auto;
-  }
+body.is-vertical-layout .header {
+  gap: 0.5rem;
+}
 
-  .tray-title,
-  .tray-hint {
-    width: 100%;
-  }
+body.is-vertical-layout .header-stats {
+  width: 100%;
+  justify-content: space-between;
+}
 
-  .planets {
-    flex-direction: row;
-    flex-wrap: wrap;
-    justify-content: center;
-  }
+body.is-vertical-layout .stat-pill {
+  flex: 1;
+  min-width: 0;
+}
+
+body.is-vertical-layout .game-board {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+body.is-vertical-layout .controls {
+  order: -1;
+  position: sticky;
+  top: 0;
+  z-index: 35;
+  background: rgba(255, 255, 255, 0.94);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  padding: 0.35rem 0;
+  border-radius: 12px;
+}
+
+body.is-vertical-layout .controls .btn {
+  flex: 1 1 auto;
+  min-width: calc(33% - 0.5rem);
+  min-height: 44px;
+}
+
+body.is-vertical-layout .play-layout {
+  display: flex;
+  flex-direction: column;
+  grid-template-columns: none;
+  gap: 0.85rem;
+}
+
+/* Kill absolute orbital layout */
+body.is-vertical-layout .space-blob {
+  position: relative;
+  min-height: 0 !important;
+  height: auto !important;
+  border-radius: 24px;
+  overflow: hidden;
+  padding: 1rem 0.85rem 1.25rem;
+}
+
+body.is-vertical-layout .orbit-stage {
+  position: relative !important;
+  inset: auto !important;
+  left: auto !important;
+  top: auto !important;
+  right: auto !important;
+  bottom: auto !important;
+  display: flex !important;
+  flex-direction: column;
+  align-items: center;
+  width: 100%;
+  min-height: 0;
+  height: auto;
+}
+
+body.is-vertical-layout .orbit-rings,
+body.is-vertical-layout .orbit-ring {
+  display: none !important;
+}
+
+body.is-vertical-layout .vertical-path {
+  display: block;
+  position: absolute;
+  top: 96px;
+  bottom: 16px;
+  left: 50%;
+  width: 3px;
+  transform: translateX(-50%);
+  background: linear-gradient(
+    180deg,
+    rgba(255, 176, 32, 0.75),
+    rgba(255, 255, 255, 0.35) 25%,
+    rgba(255, 255, 255, 0.18)
+  );
+  border-radius: 999px;
+  z-index: 0;
+  pointer-events: none;
+}
+
+body.is-vertical-layout .sun-anchor {
+  position: relative !important;
+  left: auto !important;
+  top: auto !important;
+  transform: none !important;
+  margin: 0 0 1rem;
+  z-index: 3;
+}
+
+body.is-vertical-layout .sun {
+  width: 80px;
+  height: 80px;
+}
+
+/* Vertical stack: Sun → 1 → 2 → 3 … 8 (even spacing, no clustering) */
+body.is-vertical-layout .slots,
+body.is-vertical-layout .slots--stack {
+  position: relative !important;
+  inset: auto !important;
+  display: flex !important;
+  flex-direction: column;
+  align-items: stretch;
+  gap: 0.75rem;
+  width: 100%;
+  max-width: 420px;
+  margin: 0 auto;
+  z-index: 2;
+  pointer-events: auto;
+}
+
+body.is-vertical-layout .slot-arm {
+  display: none !important;
+}
+
+body.is-vertical-layout .slots--stack > .slot,
+body.is-vertical-layout .slot {
+  position: relative !important;
+  left: auto !important;
+  right: auto !important;
+  top: auto !important;
+  transform: none !important;
+  width: 100% !important;
+  max-width: none;
+  height: auto !important;
+  min-height: 76px;
+  margin: 0;
+  padding: 0.65rem 0.85rem 0.65rem 2.6rem;
+  border-radius: 16px;
+  flex-direction: row;
+  flex-wrap: wrap;
+  justify-content: flex-start;
+  align-items: center;
+  gap: 0.35rem 0.75rem;
+  background: rgba(255, 255, 255, 0.08);
+  border: 2px dashed rgba(255, 255, 255, 0.45);
+  box-sizing: border-box;
+}
+
+body.is-vertical-layout .slot-number {
+  top: 50%;
+  left: 10px;
+  transform: translateY(-50%);
+  width: 30px;
+  height: 30px;
+  font-size: 0.85rem;
+  background: #fff;
+}
+
+body.is-vertical-layout .slot-dist {
+  display: block;
+  width: 100%;
+  order: -1;
+  margin-left: 0;
+  font-size: 0.65rem;
+  font-weight: 800;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: rgba(255, 210, 120, 0.9);
+  pointer-events: none;
+}
+
+body.is-vertical-layout .slot-placeholder {
+  font-size: 0.85rem;
+  color: rgba(255, 255, 255, 0.65);
+  text-align: left;
+  max-width: none;
+  flex: 1;
+  font-weight: 600;
+}
+
+body.is-vertical-layout .slot .planet-visual {
+  --size: 46px;
+}
+
+body.is-vertical-layout .slot .planet-visual--jupiter {
+  --size: 54px;
+}
+
+body.is-vertical-layout .slot .planet-visual--saturn,
+body.is-vertical-layout .slot .planet-visual--uranus {
+  --size: 50px;
+}
+
+body.is-vertical-layout .slot .speech-bubble {
+  position: static;
+  transform: none;
+  margin-left: auto;
+  font-size: 0.72rem;
+}
+
+body.is-vertical-layout .slot .speech-bubble::before {
+  display: none;
+}
+
+body.is-vertical-layout .slot-check {
+  top: 8px;
+  right: 8px;
+}
+
+/* Sticky planet tray */
+body.is-vertical-layout .planet-tray {
+  position: fixed;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 50;
+  flex-direction: column;
+  align-items: stretch;
+  min-height: 0;
+  margin: 0;
+  padding: 0.55rem 0.7rem calc(0.55rem + env(safe-area-inset-bottom, 0px));
+  border-radius: 20px 20px 0 0;
+  border: 3px solid #e5e7eb;
+  border-bottom: none;
+  background: #fff;
+  box-shadow: 0 -10px 30px rgba(0, 0, 0, 0.14);
+}
+
+body.is-vertical-layout .tray-title-desktop {
+  display: none;
+}
+
+body.is-vertical-layout .tray-title-mobile {
+  display: inline;
+}
+
+body.is-vertical-layout .tray-head {
+  flex-direction: row;
+  justify-content: space-between;
+  align-items: baseline;
+  padding: 0 0.1rem 0.35rem;
+  width: 100%;
+}
+
+body.is-vertical-layout .planets {
+  flex-direction: row;
+  flex-wrap: nowrap;
+  justify-content: flex-start;
+  align-items: center;
+  gap: 0.5rem;
+  overflow-x: auto;
+  overflow-y: hidden;
+  -webkit-overflow-scrolling: touch;
+  scroll-snap-type: x mandatory;
+  overscroll-behavior-x: contain;
+  padding: 0.2rem 0.1rem 0.3rem;
+}
+
+body.is-vertical-layout .planet-card {
+  flex: 0 0 auto;
+  scroll-snap-align: center;
+  min-width: 74px;
+  min-height: 74px;
+  padding: 0.4rem 0.45rem;
+  background: #f8fafc;
+  border: 2px solid #e5e7eb;
+}
+
+body.is-vertical-layout .feedback {
+  bottom: calc(8rem + env(safe-area-inset-bottom, 0px));
+}
+
+body.is-vertical-layout .start-card {
+  max-width: 100%;
 }
 
 @media (max-width: 520px) {
-  .app {
-    padding: 0.5rem 0.6rem 1rem;
+  body.is-vertical-layout .app {
+    padding: 0.5rem 0.55rem 8.25rem;
   }
 
-  .task-label {
-    font-size: 0.95rem;
+  body.is-vertical-layout .task-label {
+    font-size: 0.88rem;
   }
 
-  .space-blob {
-    min-height: 360px;
-    border-radius: 28px;
+  body.is-vertical-layout .sun {
+    width: 72px;
+    height: 72px;
   }
 
-  .orbit-ring {
-    border-width: 1px;
+  body.is-vertical-layout .vertical-path {
+    top: 88px;
   }
 
-  .slot-placeholder {
-    font-size: 0.5rem;
+  body.is-vertical-layout .slot {
+    min-height: 66px;
+  }
+
+  .complete-actions .btn,
+  .modal-panel > .btn {
+    width: 100%;
+  }
+
+  .badge-card {
+    width: 100%;
   }
 }
 
-@media (orientation: landscape) and (max-height: 520px) {
-  .space-blob {
-    min-height: 280px;
+@media (max-width: 900px) and (orientation: landscape) and (max-height: 500px) {
+  body.is-vertical-layout .app {
+    padding-bottom: 6.75rem;
+  }
+
+  body.is-vertical-layout .sun {
+    width: 56px;
+    height: 56px;
+  }
+
+  body.is-vertical-layout .vertical-path {
+    top: 66px;
+  }
+
+  body.is-vertical-layout .slot {
+    min-height: 54px;
+    padding-top: 0.35rem;
+    padding-bottom: 0.35rem;
+  }
+
+  body.is-vertical-layout .planet-card {
+    min-width: 62px;
+    min-height: 62px;
+  }
+
+  body.is-vertical-layout .feedback {
+    bottom: calc(6.5rem + env(safe-area-inset-bottom, 0px));
   }
 }
 

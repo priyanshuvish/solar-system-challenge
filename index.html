@@ -9,9 +9,9 @@
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@500;600;700;800&display=swap" rel="stylesheet" />
-  <link rel="stylesheet" href="style.css" />
+  <link rel="stylesheet" href="style.css?v=mobile4" />
 </head>
-<body>
+<body class="is-vertical-layout">
   <div class="app">
     <!-- Top bar: task text + stats -->
     <header class="header" role="banner">
@@ -92,17 +92,22 @@
             <div class="fx-layer" id="fxLayer" aria-hidden="true"></div>
 
             <div class="orbit-stage" id="orbitStage">
-              <!-- Concentric orbit rings -->
-              <div class="orbit-ring" style="--r: 11%" aria-hidden="true"></div>
-              <div class="orbit-ring" style="--r: 20%" aria-hidden="true"></div>
-              <div class="orbit-ring" style="--r: 29%" aria-hidden="true"></div>
-              <div class="orbit-ring" style="--r: 38%" aria-hidden="true"></div>
-              <div class="orbit-ring" style="--r: 48%" aria-hidden="true"></div>
-              <div class="orbit-ring" style="--r: 58%" aria-hidden="true"></div>
-              <div class="orbit-ring" style="--r: 69%" aria-hidden="true"></div>
-              <div class="orbit-ring" style="--r: 80%" aria-hidden="true"></div>
+              <!-- Concentric orbit rings (desktop) -->
+              <div class="orbit-rings" aria-hidden="true">
+                <div class="orbit-ring" style="--r: 18%"></div>
+                <div class="orbit-ring" style="--r: 28%"></div>
+                <div class="orbit-ring" style="--r: 38%"></div>
+                <div class="orbit-ring" style="--r: 48%"></div>
+                <div class="orbit-ring" style="--r: 58%"></div>
+                <div class="orbit-ring" style="--r: 68%"></div>
+                <div class="orbit-ring" style="--r: 78%"></div>
+                <div class="orbit-ring" style="--r: 88%"></div>
+              </div>
 
-              <!-- Sun (left center) -->
+              <!-- Vertical path (mobile) -->
+              <div class="vertical-path" aria-hidden="true"></div>
+
+              <!-- Sun -->
               <div class="sun-anchor" aria-label="The Sun — starting reference point" role="img">
                 <div class="sun" aria-hidden="true">
                   <div class="sun-rays"></div>
@@ -123,9 +128,14 @@
           </section>
 
           <!-- Planet tray outside the blob -->
-          <aside class="planet-tray" aria-labelledby="trayHeading">
-            <h2 id="trayHeading" class="tray-title">Drag planets here ↑</h2>
-            <p class="tray-hint" id="trayHint">onto the correct orbit</p>
+          <aside class="planet-tray" id="planetTray" aria-labelledby="trayHeading">
+            <div class="tray-head">
+              <h2 id="trayHeading" class="tray-title">
+                <span class="tray-title-desktop">Your Planets</span>
+                <span class="tray-title-mobile">Drag a planet onto an orbit ↑</span>
+              </h2>
+              <p class="tray-hint" id="trayHint">Closest to the Sun = Orbit 1</p>
+            </div>
             <div class="planets" id="planets" role="listbox" aria-label="Available planets" aria-multiselectable="false"></div>
           </aside>
         </div>
@@ -216,6 +226,6 @@
 
   <div class="drag-ghost" id="dragGhost" aria-hidden="true" hidden></div>
 
-  <script src="script.js"></script>
+  <script src="script.js?v=mobile4"></script>
 </body>
 </html>

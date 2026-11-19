@@ -81,16 +81,19 @@
   const POINTS_PER_CORRECT = 10;
   const TOTAL_PLANETS = PLANETS.length;
 
-  /** Orbit drop positions: radius matches .orbit-ring --r, angles fan like the illustration */
+  /**
+   * Desktop orbit positions — evenly spaced radii so Mercury/Venus/Earth
+   * are NOT clustered near the Sun (matches educational solar-system art).
+   */
   const ORBIT_LAYOUT = [
-    { order: 1, radius: "11%", angle: "8deg" },
-    { order: 2, radius: "20%", angle: "-12deg" },
-    { order: 3, radius: "29%", angle: "18deg" },
-    { order: 4, radius: "38%", angle: "-6deg" },
-    { order: 5, radius: "48%", angle: "14deg" },
-    { order: 6, radius: "58%", angle: "-16deg" },
-    { order: 7, radius: "69%", angle: "10deg" },
-    { order: 8, radius: "80%", angle: "-4deg" },
+    { order: 1, radius: "18%", angle: "28deg" },
+    { order: 2, radius: "28%", angle: "36deg" },
+    { order: 3, radius: "38%", angle: "42deg" },
+    { order: 4, radius: "48%", angle: "48deg" },
+    { order: 5, radius: "58%", angle: "52deg" },
+    { order: 6, radius: "68%", angle: "56deg" },
+    { order: 7, radius: "78%", angle: "60deg" },
+    { order: 8, radius: "88%", angle: "64deg" },
   ];
 
   // ---------------------------------------------------------------------------
@@ -372,61 +375,83 @@
     }
   }
 
+  function isVerticalLayout() {
+    return document.body.classList.contains("is-vertical-layout");
+  }
+
+  function buildSlotElement(order) {
+    const slot = document.createElement("div");
+    slot.className = "slot";
+    slot.dataset.order = String(order);
+    slot.setAttribute("role", "listitem");
+    slot.setAttribute("tabindex", "0");
+    slot.setAttribute(
+      "aria-label",
+      `Orbit ${order}. Drop planet number ${order} from the Sun here.`
+    );
+
+    const num = document.createElement("span");
+    num.className = "slot-number";
+    num.textContent = String(order);
+    slot.appendChild(num);
+
+    // Distance label helps kids understand order on mobile
+    const dist = document.createElement("span");
+    dist.className = "slot-dist";
+    dist.textContent = order === 1 ? "Closest to Sun" : order === 8 ? "Farthest" : `Orbit ${order}`;
+    slot.appendChild(dist);
+
+    const placedId = state.placed[order];
+    if (placedId) {
+      const planet = getPlanetById(placedId);
+      slot.classList.add("correct");
+      slot.setAttribute(
+        "aria-label",
+        `Orbit ${order}: ${planet.name} — correctly placed`
+      );
+      slot.appendChild(createPlanetVisual(planet, "planet-visual--locked", "happy"));
+
+      const bubble = document.createElement("span");
+      bubble.className = "speech-bubble";
+      bubble.textContent = planet.name;
+      slot.appendChild(bubble);
+
+      const check = document.createElement("span");
+      check.className = "slot-check";
+      check.setAttribute("aria-hidden", "true");
+      check.textContent = "✓";
+      slot.appendChild(check);
+    } else {
+      const placeholder = document.createElement("span");
+      placeholder.className = "slot-placeholder";
+      placeholder.textContent = "Drop planet here";
+      slot.appendChild(placeholder);
+    }
+
+    return slot;
+  }
+
   function renderSlots() {
     els.slots.innerHTML = "";
+    const vertical = isVerticalLayout();
+
+    // Mobile: true vertical list (no orbit arms → no clustering)
+    // Desktop: arms place slots on spaced diagonal orbits
+    els.slots.classList.toggle("slots--stack", vertical);
+    els.slots.classList.toggle("slots--orbit", !vertical);
 
     ORBIT_LAYOUT.forEach((layout) => {
-      const order = layout.order;
+      const slot = buildSlotElement(layout.order);
 
-      // Arm stretches from the Sun to the orbit radius
+      if (vertical) {
+        els.slots.appendChild(slot);
+        return;
+      }
+
       const arm = document.createElement("div");
       arm.className = "slot-arm";
       arm.style.setProperty("--radius", layout.radius);
       arm.style.setProperty("--angle", layout.angle);
-      arm.setAttribute("aria-hidden", "false");
-
-      const slot = document.createElement("div");
-      slot.className = "slot";
-      slot.dataset.order = String(order);
-      slot.setAttribute("role", "listitem");
-      slot.setAttribute("tabindex", "0");
-      slot.setAttribute(
-        "aria-label",
-        `Orbit ${order}. Drop planet number ${order} from the Sun here.`
-      );
-
-      const num = document.createElement("span");
-      num.className = "slot-number";
-      num.textContent = String(order);
-      slot.appendChild(num);
-
-      const placedId = state.placed[order];
-      if (placedId) {
-        const planet = getPlanetById(placedId);
-        slot.classList.add("correct");
-        slot.setAttribute(
-          "aria-label",
-          `Orbit ${order}: ${planet.name} — correctly placed`
-        );
-        slot.appendChild(createPlanetVisual(planet, "planet-visual--locked", "happy"));
-
-        const bubble = document.createElement("span");
-        bubble.className = "speech-bubble";
-        bubble.textContent = planet.name;
-        slot.appendChild(bubble);
-
-        const check = document.createElement("span");
-        check.className = "slot-check";
-        check.setAttribute("aria-hidden", "true");
-        check.textContent = "✓";
-        slot.appendChild(check);
-      } else {
-        const placeholder = document.createElement("span");
-        placeholder.className = "slot-placeholder";
-        placeholder.textContent = "Drop here";
-        slot.appendChild(placeholder);
-      }
-
       arm.appendChild(slot);
       els.slots.appendChild(arm);
     });
@@ -1306,10 +1331,32 @@
   // Boot
   // ---------------------------------------------------------------------------
 
+  /**
+   * Force vertical Sun→slots stack on narrow / touch screens
+   * so orbit rings never overlap drop zones.
+   */
+  function updateLayoutMode() {
+    const vertical =
+      window.matchMedia("(max-width: 900px)").matches ||
+      (window.matchMedia("(pointer: coarse)").matches &&
+        window.matchMedia("(max-width: 1100px)").matches);
+
+    const wasVertical = isVerticalLayout();
+    document.body.classList.toggle("is-vertical-layout", vertical);
+
+    // Re-build slots when switching between orbit map ↔ vertical stack
+    if (wasVertical !== vertical && state.started) {
+      renderSlots();
+    }
+  }
+
   function boot() {
     loadSavedName();
     updateScore();
     updateProgress();
+    updateLayoutMode();
+    window.addEventListener("resize", updateLayoutMode);
+    window.addEventListener("orientationchange", updateLayoutMode);
     bindEvents();
   }
 
